@@ -731,7 +731,7 @@ class Superset(BaseSupersetView):
     @api
     @handle_api_exception
     @expose(
-        "/explore_json_get_data/<datasource_type>/<datasource_id>/", methods=EXPLORE_JSON_METHODS
+        "/explore_json_internal_private/<datasource_type>/<datasource_id>/", methods=EXPLORE_JSON_METHODS
     )
     @expose("/explore_json_internal_private/", methods=EXPLORE_JSON_METHODS)
     @etag_cache(CACHE_DEFAULT_TIMEOUT)
