@@ -48,14 +48,15 @@ echo_step "2" "Starting" "Applying DB migrations"
 superset db upgrade
 echo_step "2" "Complete" "Applying DB migrations"
 
+echo_step "3" "Starting" "Setting up roles and perms"
+superset init
+echo_step "3" "Complete" "Setting up roles and perms"
+
 if [ "$SUPERSET_LOAD_EXAMPLES" = "yes" ]; then
     # Load some data to play with
-    echo_step "3" "Starting" "Loading examples"
+    echo_step "4" "Starting" "Loading examples"
     superset load_examples
-    echo_step "3" "Complete" "Loading examples"
+    echo_step "4" "Complete" "Loading examples"
 fi
 
 # Create default roles and permissions
-echo_step "4" "Starting" "Setting up roles and perms"
-superset init
-echo_step "4" "Complete" "Setting up roles and perms"

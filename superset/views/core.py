@@ -728,6 +728,48 @@ class Superset(BaseSupersetView):
         )
 
     @event_logger.log_this
+    @api
+    @handle_api_exception
+    @expose(
+        "/explore_json_get_data/<datasource_type>/<datasource_id>/", methods=EXPLORE_JSON_METHODS
+    )
+    @expose("/explore_json_internal_private/", methods=EXPLORE_JSON_METHODS)
+    @etag_cache(CACHE_DEFAULT_TIMEOUT)
+    def expore_json_get_data(self, datasource_type=None, datasource_id=None):
+        """
+        内部使用接口，不能对外网
+        取消掉鉴权===================要经常query，仅能内网访问
+        跟上面的接口一样===============================
+        :param datasource_type:
+        :param datasource_id:
+        :return:
+        """
+        csv = request.args.get("csv") == "true"
+        query = request.args.get("query") == "true"
+        results = request.args.get("results") == "true"
+        samples = request.args.get("samples") == "true"
+        force = request.args.get("force") == "true"
+        form_data = get_form_data()[0]
+
+        try:
+            datasource_id, datasource_type = get_datasource_info(
+                datasource_id, datasource_type, form_data
+            )
+        except SupersetException as e:
+            return json_error_response(utils.error_msg_from_exception(e))
+
+        viz_obj = get_viz(
+            datasource_type=datasource_type,
+            datasource_id=datasource_id,
+            form_data=form_data,
+            force=force,
+        )
+
+        return self.generate_json(
+            viz_obj, csv=csv, query=query, results=results, samples=samples
+        )
+
+    @event_logger.log_this
     @has_access
     @expose("/import_dashboards", methods=["GET", "POST"])
     def import_dashboards(self):

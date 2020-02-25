@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import AlarmLayerControl from './AlarmLayerControl';
 import AnnotationLayerControl from './AnnotationLayerControl';
 import BoundsControl from './BoundsControl';
 import CheckboxControl from './CheckboxControl';
@@ -42,6 +43,7 @@ import FilterBoxItemControl from './FilterBoxItemControl';
 import withVerification from './withVerification';
 
 const controlMap = {
+  AlarmLayerControl,
   AnnotationLayerControl,
   BoundsControl,
   CheckboxControl,

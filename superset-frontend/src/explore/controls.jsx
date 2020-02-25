@@ -2123,6 +2123,15 @@ export const controls = {
     tabOverride: 'data',
   },
 
+  alerts_setting: {
+    type: 'AlarmLayerControl',
+    label: '',
+    default: [],
+    description: 'Alerts Setting',
+    renderTrigger: true,
+    tabOverride: 'data',
+  },
+
   adhoc_filters: {
     type: 'AdhocFilterControl',
     label: t('Filters'),
