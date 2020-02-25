@@ -17,7 +17,7 @@
  * under the License.
  */
 import { t } from '@superset-ui/translation';
-import { annotations } from './sections';
+import { annotations, alerts } from './sections';
 import { D3_TIME_FORMAT_OPTIONS } from '../controls';
 
 export default {
@@ -44,6 +44,7 @@ export default {
       controlSetRows: [['adhoc_filters']],
     },
     annotations,
+    alerts,
   ],
   controlOverrides: {
     metric: {

@@ -96,6 +96,10 @@ export function annotationQueryFailed(annotation, queryResponse, key) {
   return { type: ANNOTATION_QUERY_FAILED, annotation, queryResponse, key };
 }
 
+export function runAlertQuery() {
+  return function() {};
+}
+
 export function runAnnotationQuery(
   annotation,
   timeout = 60,

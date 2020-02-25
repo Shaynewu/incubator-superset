@@ -54,6 +54,12 @@ export const annotations = {
   controlSetRows: [['annotation_layers']],
 };
 
+export const alerts = {
+  label: t('Alerts Setting'),
+  expanded: true,
+  controlSetRows: [['alerts_setting']],
+};
+
 export const NVD3TimeSeries = [
   {
     label: t('Query'),
