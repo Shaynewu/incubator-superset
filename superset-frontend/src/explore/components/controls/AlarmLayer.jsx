@@ -7,7 +7,6 @@ import { nonEmpty } from '../../validators';
 import {
   ALARM_SEVERITY_TYPES,
   ALARM_CHECK_INTERVAL_TYPES,
-  ALARM_TRIGGER_AGGREGATE,
   ALARM_TRIGGER_TIME_SHIFT,
   ALARM_TRIGGER_COMPARE,
 } from '../../../modules/AlarmTypes';
@@ -24,12 +23,14 @@ const propTypes = {
   alertName: PropTypes.string,
   checkInterval: PropTypes.string,
   severity: PropTypes.string,
-  receiver: PropTypes.string,
+  receivers: PropTypes.arrayOf(PropTypes.string),
+  chatIds: PropTypes.arrayOf(PropTypes.string),
   message: PropTypes.string,
   aggregate: PropTypes.string,
   timeShift: PropTypes.number,
-  compareLimit: PropTypes.string,
-  triggerVal: PropTypes.number,
+  compare: PropTypes.string,
+  triggerVal1: PropTypes.number,
+  triggerVal2: PropTypes.number,
 
   addAlarmLayer: PropTypes.func,
   removeAlarmLayer: PropTypes.func,
@@ -40,12 +41,14 @@ const defaultProps = {
   alertName: '',
   checkInterval: '',
   severity: '',
-  receiver: '',
+  receivers: [],
+  chatIds: [],
   message: '',
   aggregate: '',
   timeShift: '',
-  compareLimit: '',
-  triggerVal: 0,
+  compare: '',
+  triggerVal1: 0,
+  triggerVal2: 0,
 
   addAlarmLayer: () => {},
   removeAlarmLayer: () => {},
@@ -59,12 +62,14 @@ export default class AlarmLayer extends React.PureComponent {
       alertName,
       checkInterval,
       severity,
-      receiver,
+      receivers,
+      chatIds,
       message,
       aggregate,
       timeShift,
-      compareLimit,
-      triggerVal,
+      compare,
+      triggerVal1,
+      triggerVal2,
     } = props;
 
     this.state = {
@@ -73,12 +78,14 @@ export default class AlarmLayer extends React.PureComponent {
       oldAlertName: !this.props.alertName ? null : alertName,
       checkInterval,
       severity,
-      receiver,
+      receivers,
+      chatIds,
       message,
       aggregate,
       timeShift,
-      compareLimit,
-      triggerVal,
+      compare,
+      triggerVal1,
+      triggerVal2,
       // refData
       isNew: !this.props.alertName,
       isLoadingOptions: true,
@@ -113,23 +120,27 @@ export default class AlarmLayer extends React.PureComponent {
       alertName,
       checkInterval,
       severity,
-      receiver,
+      receivers,
+      chatIds,
       aggregate,
       timeShift,
-      compareLimit,
-      triggerVal,
+      compare,
+      triggerVal1,
     } = this.state;
 
     const errors = [
       nonEmpty(alertName),
       nonEmpty(severity),
-      nonEmpty(receiver),
       nonEmpty(checkInterval),
       nonEmpty(aggregate),
       nonEmpty(timeShift),
-      nonEmpty(compareLimit),
-      nonEmpty(triggerVal),
+      nonEmpty(compare),
+      nonEmpty(triggerVal1),
     ];
+
+    if ((receivers.length === 0) && (chatIds.length === 0)) {
+      errors.push(nonEmpty(receivers))
+    }
 
     return !errors.filter(x => x).length;
   }
@@ -141,9 +152,23 @@ export default class AlarmLayer extends React.PureComponent {
     }
   }
 
+  handleStringToInt(value) {
+    if (isNaN(parseFloat(value))) {
+      return 0;
+    }
+
+    return parseFloat(value);
+  }
+
   applyAlarm() {
     if (this.state.alertName.length) {
       const alarm = {};
+      this.setState(
+          {
+            triggerVal1: this.handleStringToInt(this.state.triggerVal1),
+            triggerVal2: this.handleStringToInt(this.state.triggerVal2),
+          },
+      );
       Object.keys(this.state).forEach(k => {
         if (this.state[k] !== null) {
           alarm[k] = this.state[k];
@@ -170,7 +195,8 @@ export default class AlarmLayer extends React.PureComponent {
       alertName,
       checkInterval,
       severity,
-      receiver,
+      receivers,
+      chatIds,
       message,
     } = this.state;
 
@@ -202,7 +228,7 @@ export default class AlarmLayer extends React.PureComponent {
             name="alarm-severity"
             options={ALARM_SEVERITY_TYPES}
             value={severity}
-            onChange={v => this.setState({ severity: v })}
+            onChange={v => this.setState({ severity: v, receivers: [], chatIds: []})}
           />
           <SelectControl
             hovered
@@ -213,14 +239,34 @@ export default class AlarmLayer extends React.PureComponent {
             value={checkInterval}
             onChange={v => this.setState({ checkInterval: v })}
           />
-          <TextControl
-            name="alert-config-receiver"
-            label={t('Receiver')}
-            placeholder=""
-            value={receiver}
-            onChange={v => this.setState({ receiver: v })}
-            validationErrors={!receiver ? [t('Mandatory')] : []}
+          <SelectControl
+            hovered
+            name="alert-config-receivers"
+            label="Receivers"
+            description={`Fill in the Receivers who need to receive this alert message`}
+            multi={true}
+            freeForm={true}
+            valueKey='column_name'
+            allowAll={true}
+            commaChoosesOption={false}
+            value={receivers}
+            onChange={v => this.setState({ receivers: v })}
           />
+          {(severity === "WORK_WECHAT") && (
+              <SelectControl
+                hovered
+                name="alert-config-chatIds"
+                label="ChatIds"
+                description={`Fill in the ChatIds, work-wechat groups will receive alert`}
+                multi={true}
+                freeForm={true}
+                valueKey='column_name'
+                allowAll={true}
+                commaChoosesOption={false}
+                value={chatIds}
+                onChange={v => this.setState({ chatIds: v })}
+              />
+          )}
           <TextControl
             name="alert-config-message"
             label={t('Message')}
@@ -233,8 +279,48 @@ export default class AlarmLayer extends React.PureComponent {
     );
   }
 
+  renderTriggerCompare() {
+    const { compare, triggerVal1, triggerVal2 } = this.state;
+
+    if ((compare === "outside_range") || (compare === "within_range")) {
+      return (
+          <div>
+            <TextControl
+              name="alert-trigger-value1"
+              label={"Start Trigger Value"}
+              placeholder=""
+              type={"number"}
+              value={triggerVal1}
+              onChange={v => this.setState({ triggerVal1: v })}
+            />
+            <TextControl
+              name="alert-trigger-value2"
+              label={"End Trigger Value"}
+              placeholder=""
+              type={"number"}
+              value={triggerVal2}
+              onChange={v => this.setState({ triggerVal2: v })}
+            />
+          </div>
+      );
+    } else {
+      return (
+          <div>
+            <TextControl
+              name="alert-trigger-value1"
+              label={"Value"}
+              placeholder=""
+              type={"number"}
+              value={triggerVal1}
+              onChange={v => this.setState({ triggerVal1: v })}
+            />
+          </div>
+      );
+    }
+  }
+
   renderTriggerConfigure() {
-    const { aggregate, timeShift, compareLimit, triggerVal } = this.state;
+    const { timeShift, compare } = this.state;
 
     return (
       <div
@@ -250,15 +336,6 @@ export default class AlarmLayer extends React.PureComponent {
           info={t('Configure the alert trigger condition.')}
         >
           <SelectControl
-            name="alert-trigger-aggregate"
-            label={t('Aggregate')}
-            hovered
-            description={t('choose the alert trigger condition aggregate')}
-            options={ALARM_TRIGGER_AGGREGATE}
-            value={aggregate}
-            onChange={v => this.setState({ aggregate: v })}
-          />
-          <SelectControl
             hovered
             description={t('choose the alert trigger time shift')}
             label={t('Time Shift')}
@@ -273,17 +350,10 @@ export default class AlarmLayer extends React.PureComponent {
             label={t('Compare')}
             name="alert-trigger-compare"
             options={ALARM_TRIGGER_COMPARE}
-            value={compareLimit}
-            onChange={v => this.setState({ compareLimit: v })}
+            value={compare}
+            onChange={v => this.setState({ compare: v, triggerVal1: 0, triggerVal2: 0})}
           />
-          <TextControl
-            name="alert-trigger-value"
-            label={t('Value')}
-            placeholder=""
-            value={triggerVal}
-            onChange={v => this.setState({ triggerVal: v })}
-            validationErrors={!triggerVal ? [t('Mandatory')] : []}
-          />
+          {this.renderTriggerCompare()}
         </PopoverSection>
       </div>
     );

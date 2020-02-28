@@ -3,28 +3,28 @@
  */
 
 export const ALARM_SEVERITY_TYPES = [
+  // {
+  //   value: 'EMAIL',
+  //   label: 'email',
+  // },
   {
-    value: 'EMAIL',
-    label: 'email',
-  },
-  {
-    value: 'WECHATWORK',
-    label: 'wechat_work',
+    value: 'WORK_WECHAT',
+    label: 'work_wechat',
   },
 ];
 
 export const ALARM_CHECK_INTERVAL_TYPES = [
   {
     value: 1,
-    label: 'one minute',
+    label: '1 minute',
   },
   {
     value: 5,
-    label: 'five minute',
+    label: '5 minute',
   },
   {
     value: 10,
-    label: 'ten minute',
+    label: '10 minute',
   },
   {
     value: 15,
@@ -62,31 +62,39 @@ export const ALARM_TRIGGER_AGGREGATE = [
 // value is second
 export const ALARM_TRIGGER_TIME_SHIFT = [
   {
-    value: 10,
-    label: '10 second',
-  },
-  {
-    value: 60,
+    value: 1,
     label: '1 minute',
   },
   {
-    value: 300,
+    value: 5,
     label: '5 minute',
   },
   {
-    value: 600,
+    value: 10,
     label: '10 minute',
   },
   {
-    value: 900,
+    value: 15,
     label: '15 minute',
   },
   {
-    value: 3600,
+    value: 30,
+    label: '30 minute',
+  },
+  {
+    value: 45,
+    label: '45 minute',
+  },
+  {
+    value: 60,
     label: '1 hour',
   },
   {
-    value: 86400,
+    value: 120,
+    label: '2 hour',
+  },
+  {
+    value: 1440,
     label: '1 day',
   },
 ];
@@ -100,6 +108,14 @@ export const ALARM_TRIGGER_COMPARE = [
     value: 'below',
     label: 'IS BELOW',
   },
+  {
+    value: 'outside_range',
+    label: 'IS OUTSIDE RANGE',
+  },
+  {
+    value: 'within_range',
+    label: 'IS WITHIN RANGE',
+  }
 ];
 
 // 默认参数
