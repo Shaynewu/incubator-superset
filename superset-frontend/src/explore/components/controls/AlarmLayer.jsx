@@ -122,20 +122,16 @@ export default class AlarmLayer extends React.PureComponent {
       severity,
       receivers,
       chatIds,
-      aggregate,
       timeShift,
       compare,
-      triggerVal1,
     } = this.state;
 
     const errors = [
       nonEmpty(alertName),
       nonEmpty(severity),
       nonEmpty(checkInterval),
-      nonEmpty(aggregate),
       nonEmpty(timeShift),
       nonEmpty(compare),
-      nonEmpty(triggerVal1),
     ];
 
     if ((receivers.length === 0) && (chatIds.length === 0)) {
