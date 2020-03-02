@@ -25,9 +25,7 @@ const propTypes = {
   severity: PropTypes.string,
   receivers: PropTypes.arrayOf(PropTypes.string),
   chatIds: PropTypes.arrayOf(PropTypes.string),
-  message: PropTypes.string,
-  aggregate: PropTypes.string,
-  timeShift: PropTypes.number,
+  message: PropTypes.string, timeShift: PropTypes.number,
   compare: PropTypes.string,
   triggerVal1: PropTypes.number,
   triggerVal2: PropTypes.number,
@@ -44,7 +42,6 @@ const defaultProps = {
   receivers: [],
   chatIds: [],
   message: '',
-  aggregate: '',
   timeShift: '',
   compare: '',
   triggerVal1: 0,
@@ -65,7 +62,6 @@ export default class AlarmLayer extends React.PureComponent {
       receivers,
       chatIds,
       message,
-      aggregate,
       timeShift,
       compare,
       triggerVal1,
@@ -81,7 +77,6 @@ export default class AlarmLayer extends React.PureComponent {
       receivers,
       chatIds,
       message,
-      aggregate,
       timeShift,
       compare,
       triggerVal1,
@@ -96,6 +91,7 @@ export default class AlarmLayer extends React.PureComponent {
     this.applyAlarm = this.applyAlarm.bind(this);
     this.deleteAlarm = this.deleteAlarm.bind(this);
     this.isValidForm = this.isValidForm.bind(this);
+    this.handleStringToInt = this.handleStringToInt.bind(this);
   }
 
   componentDidMount() {
@@ -159,15 +155,13 @@ export default class AlarmLayer extends React.PureComponent {
   applyAlarm() {
     if (this.state.alertName.length) {
       const alarm = {};
-      this.setState(
-          {
-            triggerVal1: this.handleStringToInt(this.state.triggerVal1),
-            triggerVal2: this.handleStringToInt(this.state.triggerVal2),
-          },
-      );
       Object.keys(this.state).forEach(k => {
         if (this.state[k] !== null) {
-          alarm[k] = this.state[k];
+          if ((k === "triggerVal1") || (k === "triggerVal2")) {
+            alarm[k] = this.handleStringToInt(this.state[k]);
+          } else {
+            alarm[k] = this.state[k];
+          }
         }
       });
       delete alarm.isNew;
