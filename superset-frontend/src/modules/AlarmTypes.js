@@ -3,10 +3,10 @@
  */
 
 export const ALARM_SEVERITY_TYPES = [
-  // {
-  //   value: 'EMAIL',
-  //   label: 'email',
-  // },
+  {
+    value: 'EMAIL',
+    label: 'email',
+  },
   {
     value: 'WORK_WECHAT',
     label: 'work_wechat',
@@ -61,10 +61,6 @@ export const ALARM_TRIGGER_AGGREGATE = [
 
 // value is second
 export const ALARM_TRIGGER_TIME_SHIFT = [
-  {
-    value: 1,
-    label: '1 minute',
-  },
   {
     value: 5,
     label: '5 minute',

@@ -21,11 +21,12 @@ import TextControl from './TextControl';
 
 const propTypes = {
   alertName: PropTypes.string,
-  checkInterval: PropTypes.string,
+  checkInterval: PropTypes.number,
   severity: PropTypes.string,
   receivers: PropTypes.arrayOf(PropTypes.string),
   chatIds: PropTypes.arrayOf(PropTypes.string),
-  message: PropTypes.string, timeShift: PropTypes.number,
+  message: PropTypes.string,
+  timeShift: PropTypes.number,
   compare: PropTypes.string,
   triggerVal1: PropTypes.number,
   triggerVal2: PropTypes.number,
@@ -37,12 +38,12 @@ const propTypes = {
 
 const defaultProps = {
   alertName: '',
-  checkInterval: '',
+  checkInterval: 0,
   severity: '',
   receivers: [],
   chatIds: [],
   message: '',
-  timeShift: '',
+  timeShift: 0,
   compare: '',
   triggerVal1: 0,
   triggerVal2: 0,
@@ -94,23 +95,6 @@ export default class AlarmLayer extends React.PureComponent {
     this.handleStringToInt = this.handleStringToInt.bind(this);
   }
 
-  componentDidMount() {
-    const { severity, isLoadingOptions } = this.state;
-    this.fetchOptions(severity, isLoadingOptions);
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.sourceType !== this.state.sourceType) {
-      this.fetchOptions(this.state.annotationType, this.state.sourceType, true);
-    }
-  }
-
-  fetchOptions(severity, isLoadingOptions) {
-    if (isLoadingOptions === true) {
-      SupersetClient.get({});
-    }
-  }
-
   isValidForm() {
     const {
       alertName,
@@ -120,6 +104,8 @@ export default class AlarmLayer extends React.PureComponent {
       chatIds,
       timeShift,
       compare,
+      triggerVal1,
+      triggerVal2,
     } = this.state;
 
     const errors = [
@@ -133,7 +119,10 @@ export default class AlarmLayer extends React.PureComponent {
     if ((receivers.length === 0) && (chatIds.length === 0)) {
       errors.push(nonEmpty(receivers))
     }
-
+    if (((compare === "outside_range") || (compare === "within_range")) &&
+        (this.handleStringToInt(triggerVal1) >= this.handleStringToInt(triggerVal2))) {
+      errors.push(t('Start Trigger Value must less End Trigger Value'))
+    }
     return !errors.filter(x => x).length;
   }
 
@@ -367,9 +356,6 @@ export default class AlarmLayer extends React.PureComponent {
             {!isNew ? t('Remove') : t('Cancel')}
           </Button>
           <div>
-            <Button bsSize="sm" disabled={!isValid} onClick={this.applyAlarm}>
-              {t('Apply')}
-            </Button>
             <Button bsSize="sm" disabled={!isValid} onClick={this.submitAlarm}>
               {t('OK')}
             </Button>
