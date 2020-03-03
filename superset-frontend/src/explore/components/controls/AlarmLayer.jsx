@@ -22,7 +22,7 @@ import TextControl from './TextControl';
 const propTypes = {
   alertName: PropTypes.string,
   checkInterval: PropTypes.number,
-  severity: PropTypes.string,
+  severity: PropTypes.arrayOf(PropTypes.string),
   receivers: PropTypes.arrayOf(PropTypes.string),
   chatIds: PropTypes.arrayOf(PropTypes.string),
   message: PropTypes.string,
@@ -39,7 +39,7 @@ const propTypes = {
 const defaultProps = {
   alertName: '',
   checkInterval: 0,
-  severity: '',
+  severity: [],
   receivers: [],
   chatIds: [],
   message: '',
@@ -201,13 +201,15 @@ export default class AlarmLayer extends React.PureComponent {
             validationErrors={!alertName ? [t('Mandatory')] : []}
           />
           <SelectControl
-            hovered
             description={t('choose the alert Severity type')}
             label={t('Alarm Severity')}
             name="alarm-severity"
+            multi={true}
+            freeForm={false}
+            allowAll={true}
             options={ALARM_SEVERITY_TYPES}
             value={severity}
-            onChange={v => this.setState({ severity: v, receivers: [], chatIds: []})}
+            onChange={v => this.setState({ severity: v})}
           />
           <SelectControl
             hovered
@@ -231,21 +233,19 @@ export default class AlarmLayer extends React.PureComponent {
             value={receivers}
             onChange={v => this.setState({ receivers: v })}
           />
-          {(severity === "WORK_WECHAT") && (
-              <SelectControl
-                hovered
-                name="alert-config-chatIds"
-                label="ChatIds"
-                description={`Fill in the ChatIds, work-wechat groups will receive alert`}
-                multi={true}
-                freeForm={true}
-                valueKey='column_name'
-                allowAll={true}
-                commaChoosesOption={false}
-                value={chatIds}
-                onChange={v => this.setState({ chatIds: v })}
-              />
-          )}
+          <SelectControl
+            hovered
+            name="alert-config-chatIds"
+            label="ChatIds"
+            description={`Fill in the ChatIds, work-wechat groups will receive alert`}
+            multi={true}
+            freeForm={true}
+            valueKey='column_name'
+            allowAll={true}
+            commaChoosesOption={false}
+            value={chatIds}
+            onChange={v => this.setState({ chatIds: v })}
+          />
           <TextControl
             name="alert-config-message"
             label={t('Message')}
