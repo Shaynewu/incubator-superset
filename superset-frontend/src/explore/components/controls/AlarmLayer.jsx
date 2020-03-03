@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { t } from '@superset-ui/translation';
 import { SupersetClient } from '@superset-ui/connection';
-import { Button } from 'react-bootstrap';
+import {Button, FormControl, FormGroup} from 'react-bootstrap';
 import { nonEmpty } from '../../validators';
 import {
   ALARM_SEVERITY_TYPES,
@@ -23,6 +23,7 @@ const propTypes = {
   alertName: PropTypes.string,
   checkInterval: PropTypes.number,
   severity: PropTypes.arrayOf(PropTypes.string),
+  emailReceivers: PropTypes.arrayOf(PropTypes.string),
   receivers: PropTypes.arrayOf(PropTypes.string),
   chatIds: PropTypes.arrayOf(PropTypes.string),
   message: PropTypes.string,
@@ -40,6 +41,7 @@ const defaultProps = {
   alertName: '',
   checkInterval: 0,
   severity: [],
+  emailReceivers: [],
   receivers: [],
   chatIds: [],
   message: '',
@@ -60,6 +62,7 @@ export default class AlarmLayer extends React.PureComponent {
       alertName,
       checkInterval,
       severity,
+      emailReceivers,
       receivers,
       chatIds,
       message,
@@ -75,6 +78,7 @@ export default class AlarmLayer extends React.PureComponent {
       oldAlertName: !this.props.alertName ? null : alertName,
       checkInterval,
       severity,
+      emailReceivers,
       receivers,
       chatIds,
       message,
@@ -100,6 +104,7 @@ export default class AlarmLayer extends React.PureComponent {
       alertName,
       checkInterval,
       severity,
+      emailReceivers,
       receivers,
       chatIds,
       timeShift,
@@ -116,7 +121,7 @@ export default class AlarmLayer extends React.PureComponent {
       nonEmpty(compare),
     ];
 
-    if ((receivers.length === 0) && (chatIds.length === 0)) {
+    if ((receivers.length === 0) && (chatIds.length === 0) && (emailReceivers.length === 0)) {
       errors.push(nonEmpty(receivers))
     }
     if (((compare === "outside_range") || (compare === "within_range")) &&
@@ -169,13 +174,126 @@ export default class AlarmLayer extends React.PureComponent {
     this.props.close();
   }
 
+  renderAlertReceiver() {
+    const {
+      severity,
+      emailReceivers,
+      receivers,
+      chatIds,
+    } = this.state;
+
+    if (severity.indexOf("WORK_WECHAT") > -1 && severity.length === 1) {
+      this.state.emailReceivers = [];
+      return (
+          <div>
+            <SelectControl
+              hovered
+              name="alert-config-receivers"
+              label="Receivers"
+              description={`Fill in the Receivers who need to receive this alert message`}
+              multi={true}
+              freeForm={true}
+              valueKey='column_name'
+              allowAll={true}
+              commaChoosesOption={false}
+              value={receivers}
+              onChange={v => this.setState({ receivers: v })}
+            />
+            <SelectControl
+              hovered
+              name="alert-config-chatIds"
+              label="ChatIds"
+              description={`Fill in the ChatIds, work-wechat groups will receive alert`}
+              multi={true}
+              freeForm={true}
+              valueKey='column_name'
+              allowAll={true}
+              commaChoosesOption={false}
+              value={chatIds}
+              onChange={v => this.setState({ chatIds: v })}
+            />
+          </div>
+      )
+    } else if (severity.indexOf("EMAIL") > -1 && severity.length === 1) {
+      this.state.receivers = [];
+      this.state.chatIds = [];
+      return (
+          <div>
+            <SelectControl
+              hovered
+              name="alert-config-email-receivers"
+              label="EmailReceivers"
+              description={`Fill in the email Receivers who need to receive this alert message`}
+              multi={true}
+              freeForm={true}
+              valueKey='column_name'
+              allowAll={true}
+              commaChoosesOption={false}
+              value={emailReceivers}
+              onChange={v => this.setState({ emailReceivers: v })}
+            />
+          </div>
+      )
+    } else if (severity.length > 1) {
+      return (
+          <div>
+            <div>
+              <SelectControl
+                hovered
+                name="alert-config-email-receivers"
+                label="EmailReceivers"
+                description={`Fill in the email Receivers who need to receive this alert message`}
+                multi={true}
+                freeForm={true}
+                valueKey='column_name'
+                allowAll={true}
+                commaChoosesOption={false}
+                value={emailReceivers}
+                onChange={v => this.setState({ emailReceivers: v })}
+              />
+            </div>
+            <div>
+              <SelectControl
+                hovered
+                name="alert-config-receivers"
+                label="Receivers"
+                description={`Fill in the Receivers who need to receive this alert message`}
+                multi={true}
+                freeForm={true}
+                valueKey='column_name'
+                allowAll={true}
+                commaChoosesOption={false}
+                value={receivers}
+                onChange={v => this.setState({ receivers: v })}
+              />
+              <SelectControl
+                hovered
+                name="alert-config-chatIds"
+                label="ChatIds"
+                description={`Fill in the ChatIds, work-wechat groups will receive alert`}
+                multi={true}
+                freeForm={true}
+                valueKey='column_name'
+                allowAll={true}
+                commaChoosesOption={false}
+                value={chatIds}
+                onChange={v => this.setState({ chatIds: v })}
+              />
+            </div>
+          </div>
+      )
+    } else {
+      this.state.receivers = [];
+      this.state.chatIds = [];
+      this.state.emailReceivers = [];
+    }
+  }
+
   renderAlertConfigure() {
     const {
       alertName,
       checkInterval,
       severity,
-      receivers,
-      chatIds,
       message,
     } = this.state;
 
@@ -220,39 +338,21 @@ export default class AlarmLayer extends React.PureComponent {
             value={checkInterval}
             onChange={v => this.setState({ checkInterval: v })}
           />
-          <SelectControl
-            hovered
-            name="alert-config-receivers"
-            label="Receivers"
-            description={`Fill in the Receivers who need to receive this alert message`}
-            multi={true}
-            freeForm={true}
-            valueKey='column_name'
-            allowAll={true}
-            commaChoosesOption={false}
-            value={receivers}
-            onChange={v => this.setState({ receivers: v })}
-          />
-          <SelectControl
-            hovered
-            name="alert-config-chatIds"
-            label="ChatIds"
-            description={`Fill in the ChatIds, work-wechat groups will receive alert`}
-            multi={true}
-            freeForm={true}
-            valueKey='column_name'
-            allowAll={true}
-            commaChoosesOption={false}
-            value={chatIds}
-            onChange={v => this.setState({ chatIds: v })}
-          />
-          <TextControl
-            name="alert-config-message"
-            label={t('Message')}
-            placeholder=""
-            value={message}
-            onChange={v => this.setState({ message: v })}
-          />
+          {this.renderAlertReceiver()}
+          <FormGroup>
+            <label className="control-label" htmlFor="message">
+              {t('Message')}
+            </label>
+            <FormControl
+              name="alert-config-message"
+              type="text"
+              componentClass="textarea"
+              bsSize="sm"
+              value={message}
+              onChange={event => this.setState({ message: event.target.value })}
+              style={{ maxWidth: '100%' }}
+            />
+          </FormGroup>
         </PopoverSection>
       </div>
     );
@@ -298,7 +398,8 @@ export default class AlarmLayer extends React.PureComponent {
     }
   }
 
-  renderTriggerConfigure() {
+  renderTriggerConfigure()
+  {
     const { timeShift, compare } = this.state;
 
     return (
