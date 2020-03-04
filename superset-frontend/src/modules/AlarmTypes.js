@@ -15,10 +15,6 @@ export const ALARM_SEVERITY_TYPES = [
 
 export const ALARM_CHECK_INTERVAL_TYPES = [
   {
-    value: 1,
-    label: '1 minute',
-  },
-  {
     value: 5,
     label: '5 minute',
   },
