@@ -588,6 +588,11 @@ class TableViz(BaseViz):
             self.form_data.get("percent_metrics") or []
         )
 
+        df_columns = set(df.columns)
+        for c in non_percent_metric_columns:
+            if c not in df_columns:
+                non_percent_metric_columns.remove(c)
+
         df = pd.concat(
             [
                 df[non_percent_metric_columns],
